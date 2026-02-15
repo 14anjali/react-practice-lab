@@ -1,4 +1,6 @@
 import { useState } from "react";
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
 
 function Form() {
   const [formData, setFormData] = useState({
@@ -7,23 +9,35 @@ function Form() {
     password: "",
   });
   const [error, setError] = useState({});
+  
+  const validate = (data) => {
+    let newError = {};
+
+    const name = data.name.trim();
+    const email = data.email.trim();
+    const password = data.password.trim();
+
+    if (!name) {
+      newError.name = "name is required";
+    }
+    if (!email) {
+      newError.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newError.email = "Invalid email format";
+    }
+    if (!password) {
+      newError.password = "Password is required";
+    } else if (!passwordRegex.test(formData.password)) {
+      newError.password =  "Password must be 8+ characters with uppercase, lowercase and number";
+    }
+    return newError;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    let newError = {};
-
-    if (!formData.name.trim()) {
-      newError.name = "name is required";
-    }
-    if (!formData.email.trim()) {
-      newError.email = "Email is required";
-    }
-    if (!formData.password.trim()) {
-      newError.password = "Password is required";
-    }
+    const newError = validate(formData);
     setError(newError);
-
     if (Object.keys(newError).length === 0) {
       alert(`details are submitted`);
       console.log(formData);
@@ -32,8 +46,10 @@ function Form() {
         email: "",
         password: "",
       });
+      setError({});
     }
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
